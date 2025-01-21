@@ -1,0 +1,64 @@
+{
+  "compilerOptions": {
+    "checkJs": true,
+    "allowJs": true,
+    "jsx": "react",
+    "baseUrl": ".",
+    "paths": {
+      "/*": [
+        "./*"
+      ],
+      "meteor/mongo": [
+        "/Users/shravankumar/.meteor/packages/mongo/2.1.0/web.browser/local_collection_driver.js",
+        "/Users/shravankumar/.meteor/packages/mongo/2.1.0/web.browser/collection/collection.js",
+        "/Users/shravankumar/.meteor/packages/mongo/2.1.0/web.browser/asynchronous_cursor.js",
+        "/Users/shravankumar/.meteor/packages/mongo/2.1.0/web.browser/doc_fetcher.js",
+        "/Users/shravankumar/.meteor/packages/mongo/2.1.0/web.browser/mongo_common.js",
+        "/Users/shravankumar/.meteor/packages/mongo/2.1.0/web.browser/mongo_connection.js",
+        "/Users/shravankumar/.meteor/packages/mongo/2.1.0/web.browser/mongo_driver.js",
+        "/Users/shravankumar/.meteor/packages/mongo/2.1.0/web.browser/mongo_utils.js",
+        "/Users/shravankumar/.meteor/packages/mongo/2.1.0/web.browser/oplog_observe_driver.js",
+        "/Users/shravankumar/.meteor/packages/mongo/2.1.0/web.browser/collection/collection_utils.js",
+        "/Users/shravankumar/.meteor/packages/mongo/2.1.0/web.browser/collection/methods_async.js",
+        "/Users/shravankumar/.meteor/packages/mongo/2.1.0/web.browser/collection/methods_index.js",
+        "/Users/shravankumar/.meteor/packages/mongo/2.1.0/web.browser/collection/methods_replication.js",
+        "/Users/shravankumar/.meteor/packages/mongo/2.1.0/web.browser/collection/methods_sync.js"
+      ],
+      "meteor/reactive-var": [
+        "/Users/shravankumar/.meteor/packages/reactive-var/1.0.13/web.browser/reactive-var.js"
+      ],
+      "meteor/es5-shim": [
+        "/Users/shravankumar/.meteor/packages/es5-shim/4.8.1/web.browser/client.js",
+        "/Users/shravankumar/.meteor/packages/es5-shim/4.8.1/web.browser/console.js",
+        "/Users/shravankumar/.meteor/packages/es5-shim/4.8.1/web.browser/cordova.js",
+        "/Users/shravankumar/.meteor/packages/es5-shim/4.8.1/web.browser/export_globals.js",
+        "/Users/shravankumar/.meteor/packages/es5-shim/4.8.1/web.browser/import_globals.js"
+      ],
+      "meteor/ecmascript": [
+        "/Users/shravankumar/.meteor/packages/ecmascript/0.16.10/web.browser/ecmascript.js"
+      ],
+      "meteor/shell-server": [
+        "/Users/shravankumar/.meteor/packages/shell-server/0.6.1/web.browser/main.js",
+        "/Users/shravankumar/.meteor/packages/shell-server/0.6.1/web.browser/shell-server.js"
+      ],
+      "meteor/hot-module-replacement": [
+        "/Users/shravankumar/.meteor/packages/hot-module-replacement/0.5.4/web.browser/hot-api.js",
+        "/Users/shravankumar/.meteor/packages/hot-module-replacement/0.5.4/web.browser/client.js",
+        "/Users/shravankumar/.meteor/packages/hot-module-replacement/0.5.4/web.browser/server.js"
+      ],
+      "meteor/react-meteor-data": [
+        "/Users/shravankumar/.meteor/packages/react-meteor-data/3.0.3/web.browser/index.js",
+        "/Users/shravankumar/.meteor/packages/react-meteor-data/3.0.3/web.browser/suspense/index.js"
+      ]
+    }
+  },
+  "typeAcquisition": {
+    "include": [
+      "meteor"
+    ]
+  },
+  "exclude": [
+    "node_modules",
+    ".meteor"
+  ]
+}
