@@ -1,60 +1,75 @@
-import React, { useEffect, useRef } from "react";
-import { Terminal } from "xterm";
-import 'xterm/css/xterm.css';
+import React, { useEffect, useRef } from 'react';
 import { Meteor } from 'meteor/meteor';
+import { Terminal } from 'xterm';
+import { FitAddon } from 'xterm-addon-fit';
+import 'xterm/css/xterm.css';
+import { OutputCollection } from '../api/links';
 
 const TerminalComponent = () => {
-    const terminalRef = useRef(null);
-    const term = useRef(null);
-    const inputBuffer = useRef('');
+  const terminalRef = useRef(null);
+  const term = useRef(null);
+  const fitAddon = useRef(new FitAddon());
 
-    useEffect(() => {
-        // Initialize terminal
-        term.current = new Terminal({
-            cursorBlink: true,
-        });
-        term.current.open(terminalRef.current);
+  useEffect(() => {
+    // Initialize terminal
+    term.current = new Terminal({
+      cursorBlink: true,
+      fontSize: 14,
+      fontFamily: 'monospace',
+      convertEol: true,
+      theme: {
+        background: '#000000',
+        foreground: '#ffffff',
+      }
+    });
 
-        // Handle user input
-        term.current.onData((data) => {
-            if (data === '\r') {
-                // Enter key
-                const command = inputBuffer.current.trim();
-                inputBuffer.current = ''; // Clear input buffer
-                term.current.write('\r\n'); // New line
+    term.current.loadAddon(fitAddon.current);
+    term.current.open(terminalRef.current);
+    fitAddon.current.fit();
 
-                // Send the command to the server
-                Meteor.call('runCommand', command, (err, res) => {
-                    if (err) {
-                        term.current.write(`Error: ${err}\r\n`);
-                    } else {
-                        term.current.write(`${res}\r\n`);
-                    }
-                    term.current.write('$ '); // Prompt
-                });
-            } else if (data === '\x7f') {
-                // Backspace handling
-                if (inputBuffer.current.length > 0) {
-                    inputBuffer.current = inputBuffer.current.slice(0, -1);
-                    term.current.write('\b \b');
-                }
-            } else {
-                // Regular input
-                inputBuffer.current += data;
-                term.current.write(data);
-            }
-        });
+    // Handle window resizing
+    const handleResize = () => fitAddon.current.fit();
+    window.addEventListener('resize', handleResize);
 
-        // Initial prompt
-        term.current.write('$ ');
+    // Subscribe to server output
+    const subHandle = Meteor.subscribe('terminalOutput');
 
-        return () => {
-            // Cleanup terminal on unmount
-            term.current.dispose();
-        };
-    }, []);
+    // Handle user input
+    term.current.onData((data) => {
+      // Send to server only - removed local echo to prevent double characters
+      Meteor.call('sendInputToShell', data, (error) => {
+        if (error) console.error('Failed to send input:', error);
+      });
+    });
 
-    return <div ref={terminalRef} style={{ height: '400px', width: '100%' }}></div>;
+    // Handle server output
+    const query = OutputCollection.find({}, { sort: { createdAt: 1 } });
+    const observer = query.observe({
+      added: (doc) => {
+        term.current.write(doc.text);
+      }
+    });
+
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      observer.stop();
+      subHandle.stop();
+      term.current.dispose();
+    };
+  }, []);
+
+  return (
+    <div
+      ref={terminalRef}
+      style={{ 
+        width: '100%', 
+        height: '400px', 
+        backgroundColor: 'black',
+        padding: '10px',
+        borderRadius: '5px'
+      }}
+    />
+  );
 };
 
 export default TerminalComponent;
