@@ -1,3 +1,4 @@
+```mermaid
 graph TD
     subgraph Client
         UI[Terminal UI Component]
