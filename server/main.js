@@ -2,14 +2,32 @@ import { Meteor } from 'meteor/meteor';
 import { OutputCollection } from '/imports/api/links';
 import pty from 'node-pty';
 
-let shellProcess = null;
+const shellProcesses = new Map();
 
 Meteor.startup(() => {
   OutputCollection.removeAsync({});
+});
+
+Meteor.publish('terminalOutput', function () {
+  if (!this.userId) {
+    return this.ready();
+  }
+  return OutputCollection.find(
+    { userId: this.userId },
+    { 
+      sort: { createdAt: 1 },
+      limit: 1000
+    }
+  );
+});
+
+const initializeShell = (userId) => {
+  if (shellProcesses.has(userId)) {
+    return shellProcesses.get(userId);
+  }
 
   const shell = process.platform === 'win32' ? 'powershell.exe' : 'bash';
-
-  shellProcess = pty.spawn(shell, [], {
+  const shellProcess = pty.spawn(shell, [], {
     name: 'xterm-256color',
     cols: 80,
     rows: 24,
@@ -20,30 +38,46 @@ Meteor.startup(() => {
     },
   });
 
-  console.log('Shell started:', shell);
-
   shellProcess.onData((data) => {
-    console.log('RAW output:', data);
     OutputCollection.insertAsync({
       text: data,
+      userId: userId,
       createdAt: new Date()
     });
   });
 
-  Meteor.publish('terminalOutput', function () {
-    return OutputCollection.find({}, { 
-      sort: { createdAt: 1 },
-      limit: 1000
-    });
-  });
-});
+  shellProcesses.set(userId, shellProcess);
+  return shellProcess;
+};
 
 Meteor.methods({
+  initializeUserTerminal() {
+    if (!this.userId) {
+      throw new Meteor.Error('not-authorized');
+    }
+    return initializeShell(this.userId);
+  },
+
   sendInputToShell(input) {
-    console.log('Input received:', input);
+    if (!this.userId) {
+      throw new Meteor.Error('not-authorized');
+    }
+    
+    const shellProcess = shellProcesses.get(this.userId);
     if (!shellProcess) {
       throw new Meteor.Error('shell-error', 'Shell not running');
     }
+    
     shellProcess.write(input);
   },
+
+  cleanupUserTerminal() {
+    if (!this.userId) return;
+    
+    const shellProcess = shellProcesses.get(this.userId);
+    if (shellProcess) {
+      shellProcess.kill();
+      shellProcesses.delete(this.userId);
+    }
+  }
 });
